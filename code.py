@@ -1,11 +1,13 @@
 import board
 import time
 import neopixel
-import LedBoard
+from ghess import LedBoard
+
+ledBoard = LedBoard()
 
 # Choose an open pin connected to the Data In of the NeoPixel strip, i.e. board.D18
 # NeoPixels must be connected to D10, D12, D18 or D21 to work.
-pixel_pin = board.GP28
+pixel_pin = board.GP17
 
 # The number of NeoPixels
 num_pixels = 256
@@ -14,7 +16,7 @@ num_pixels = 256
 # For RGBW NeoPixels, simply change the ORDER to RGBW or GRBW.
 ORDER = neopixel.GRB
 
-pixels = neopixel.NeoPixel(board.GP17, num_pixels, brightness=0.1, auto_write=False)
+pixels = neopixel.NeoPixel(pixel_pin, num_pixels, brightness=0.1, auto_write=False)
 
 RED = (255, 0, 0)
 YELLOW = (255, 150, 0)
@@ -22,6 +24,7 @@ GREEN = (0, 255, 0)
 CYAN = (0, 255, 255)
 BLUE = (0, 0, 255)
 PURPLE = (180, 0, 255)
+
 
 def wheel(pos):
     # Input a value 0 to 255 to get a color value.
@@ -53,16 +56,18 @@ def rainbow_cycle(wait):
         pixels.show()
         time.sleep(wait)
 
+def checker_board():
+    for x in range(16):
+        for y in range(16):
+            index = ledBoard.get_index(x, y)
+            white_row = (y % 4) > 1
+            white_col = (x % 4) > 1
+            if white_row ^ white_col:
+                pixels[index] = (0, 0, 64)
+            else:
+                pixels[index] = (32, 32, 0)
 
-ledBoard = LedBoard()
+# pixels[0] = BLUE
+checker_board()
 
-for x in range(16):
-    for y in range(16):
-        index = ledBoard.get_index(x, y)
-        white_row = (y % 4) > 1
-        white_col = (x % 4) > 1
-        if white_row ^ white_col:
-            pixels[index] = (32, 0, 0)
-        else:
-            pixels[index] = (0, 32, 0)
 pixels.show()

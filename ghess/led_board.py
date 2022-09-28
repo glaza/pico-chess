@@ -23,5 +23,5 @@ class LedBoard:
     def get_index(self, x, y):
         return self.indices[y][x]
 
-    def light(self, coord, color):
+    def light(self, coord: str, color: str):
         pass

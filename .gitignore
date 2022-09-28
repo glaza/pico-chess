@@ -1,5 +1,6 @@
-.fsevend/
+.fseventsd/
 boot_out.txt
+._*.mpy
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
