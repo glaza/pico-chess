@@ -1,0 +1,3 @@
+[submodule "gospel"]
+	path = gospel
+	url = https://github.com/glaza/gospel.git
