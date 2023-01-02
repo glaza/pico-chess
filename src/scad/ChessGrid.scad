@@ -1,9 +1,12 @@
-include <../gospel/gospel.scad>
+include <../../gospel/gospel.scad>
 
+// Entire board: 375mm
+// Square size: 46.875mm
+// Cell size: 23.4375mm
 $fn = 25;
 THICK = 1;
 GAP = 0.25;
-EDGE = 23.5;
+EDGE = 23.4375;
 WALL = EDGE - THICK;
 LONG_WALL = 2*EDGE;
 DEPTH = 10;
