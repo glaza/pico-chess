@@ -9,7 +9,7 @@ GAP = 0.25;
 EDGE = 23.4375;
 WALL = EDGE - THICK;
 LONG_WALL = 2*EDGE;
-DEPTH = 10;
+DEPTH = 18.5;
 SHAFT = 3.5;
 WIRE_DIA = 2.5;
 REED_DIA = 2.5;
@@ -19,8 +19,8 @@ SHORT_WALL = EDGE - SHAFT/2;
 FINS = 2;
 
 
-//for (row = [0 : 1]) {
-//    for (col = [0 : 1]) {
+//for (row = [0 : 3]) {
+//    for (col = [0 : 3]) {
 //        x(col*2.0*EDGE) y(row*2.0*EDGE) square();
 //    }
 //}
@@ -36,7 +36,7 @@ module square() {
     red() x(THICK/2) z(DEPTH/2)
     difference() {
         cube([LONG_WALL, THICK, DEPTH], center = true);
-        x(2.5) z(-3) rx(90)
+        x(2.5) z(-DEPTH + 11.5) rx(90)
         cylinder(h = 2*THICK, d = WIRE_DIA, center = true);
     }
     
@@ -49,7 +49,7 @@ module square() {
     yellow() x(THICK/2) y(-EDGE) z(DEPTH/2)
     difference() {
         cube([LONG_WALL, THICK, DEPTH], center = true);
-        x(2.5) z(-3) rx(90)
+        x(2.5) z(-DEPTH + 11.5) rx(90)
         cylinder(h = 2*THICK, d = WIRE_DIA, center = true);
     }
 

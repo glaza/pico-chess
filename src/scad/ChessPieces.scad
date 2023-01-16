@@ -48,7 +48,7 @@ function segment(name, height, bottom_radius, top_radius) = [name, height, botto
 function get_name(segment) = segment[0];
 function get_height(segment) = segment[1];
 function get_bottom_radius(segment) = segment[2];
-function get_top_raduis(segment) = segment[3];
+function get_top_radius(segment) = segment[3];
 
 
 module chess_piece(segments) {
@@ -56,10 +56,7 @@ module chess_piece(segments) {
     for (index = [0:len(segments) - 1]) {
         segment = segments[index];
         name = get_name(segment);
-        height = get_height(segment);
-        bottom_radius = get_bottom_radius(segment);
-        top_radius = get_top_raduis(segment);
-        
+        height = get_height(segment);        
         accumulated_height = accumulate_height(segments, index);
         base_height = accumulated_height - height;
         
@@ -67,70 +64,37 @@ module chess_piece(segments) {
         
         translate([0, 0, base_height])
         rotate_extrude()
-        polygon(profile(name, height, bottom_radius, top_radius));
+        polygon(profile(segment));
     }
 }
 
-function profile(name, height, bottom_radius, top_radius) =
-    name == "OGEE" ? ogee_profile(height, bottom_radius, top_radius) :
-    name == "VEE" ? vee_profile(height, bottom_radius, top_radius) :
-    /*name == "COVE" ? */cove_profile(height, bottom_radius, top_radius);
+function profile(segment) =
+    let(name = get_name(segment))
+    name == "OGEE" ? ogee_profile(segment) :
+    name == "VEE" ? vee_profile(segment) :
+    /*name == "COVE" ? */cove_profile(segment);
 
 function accumulate_height(segments, index) = 
     let(height = get_height(segments[index]))
     index == 0 ? height : height + accumulate_height(segments, index - 1);
 
 
-
-function ogee_profile(h, r1, r2) =
-    let(delta = r1 - r2)
+function ogee_profile(segment) =
+    let(
+        height = get_height(segment),
+        bottom_radius = get_bottom_radius(segment),
+        top_radius = get_top_radius(segment),
+        delta = abs(top_radius - bottom_radius)
+    )
 [
-    for (t = [0:h/$fn:h])
+    for (t = [0:height/$fn:height])
     [
-        0.06 * sin(250 * t / h) + r2 + delta * (1 - t),
+        0.06 * sin(250 * t / height) + top_radius + delta * (1 - t),
         t
     ]
 ];
 
-//height3 = 1;
-//r13 = 0.25;
-//r23 = 0;
-//r_min3 = min(r13, r23);
-//delta3 = abs(r13 - r23);
-//angle3 = asin(delta3);
-//r3 = height3 / (1 + cos(angle3));
-//is_top_angled3 = r23 > r13;
-//bottom_angle3 = -90 + (is_top_angled3 ? 0 : angle3);
-//top_angle3 = 90 - (is_top_angled3 ? angle3 : 0);
-//bottom_offset3 = is_top_angled3 ? 0 : cos(angle3);
-//swing3 = top_angle3 - bottom_angle3;
-//echo("r_min" , min(r13, r23));
-//echo("delta" , abs(r13 - r23));
-//echo("r", r3);
-//echo("angle" , asin(delta3));
-//echo("bottom_angle" , bottom_angle3);
-//echo("top_angle" , top_angle3);
-//echo("bottom_offset3", bottom_offset3);
-//echo("swing" , top_angle3 - bottom_angle3);
-
-
-//for (h = [1:1]) {
-//    for (r1 = [1:1]) {
-//        for (r2 = [1:1]) {
-//            translate([5*r1, 5*r2, h])
-//            polygon(bullnose_profile(h, r1, r2));
-//        }
-//    }
-//}
-
-//polygon(bullnose_profile(1, 0.25, 0));
-
-//   ,-'r2 ^
-//  /      |
-// |       h
-//  \      |
-//   '-.r1 v
-function bullnose_profile(height, r1, r2) =
+function bullnose_profile(segment) =
     let(
         r_min = min(r1, r2),
         delta = abs(r1 - r2),
@@ -150,36 +114,34 @@ function bullnose_profile(height, r1, r2) =
     ]
 ];
 
-//   /r2 ^
-//  /    |
-// <     h
-//  \    |
-//   \r1 v
-function vee_profile(height, r1, r2) =
+
+function vee_profile(segment) =
     let(
-        delta = abs(r2 - r1),
-        r_min = min(r1, r2)
+        height = get_height(segment),
+        bottom_radius = get_bottom_radius(segment),
+        top_radius = get_top_radius(segment),
+        delta = abs(top_radius - bottom_radius),
+        r_min = min(top_radius, bottom_radius)
     )
 [
-    [r1, 0], [r_min + height/2, height/2], [r2, height]
+    [bottom_radius, 0], [r_min + height/2, height/2], [top_radius, height]
 ];
 
-//
-//
-//
-function cove_profile(h, r1, r2) =
+
+function cove_profile(segment) =
+    let(
+        height = get_height(segment),
+        bottom_radius = get_bottom_radius(segment),
+        top_radius = get_top_radius(segment),
+        delta = abs(bottom_radius - top_radius)
+    )
 [
-    [r2, 0],
-    for (t = [0 : h/$fn : h])
-        let(delta = r1 - r2, u = delta * 3.75 * (1 - t/h), u2 = u * u)
+    [top_radius, 0],
+    for (t = [0 : height/$fn : height])
+        let(u = delta * 3.75 * (1 - t / height))
     [
-        r2 + u2,
+        top_radius + u * u,
         t
     ]
 ];
 
-module extrude(profile) {
-    rotate_extrude() polygon(profile);
-}
-
-function hypotenuse(a, b) = sqrt(a*a + b*b);
