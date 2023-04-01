@@ -1,93 +1,137 @@
-include <../../gospel/gospel.scad>
+include <gospel.scad>
 
 // Entire board: 375mm
 // Square size: 46.875mm
 // Cell size: 23.4375mm
 $fn = 25;
-THICK = 1;
+THICK = 0.75;
 GAP = 0.25;
+TIP = 1;
 EDGE = 23.4375;
 WALL = EDGE - THICK;
 LONG_WALL = 2*EDGE;
-DEPTH = 18.5;
+DEPTH = 18.5 - TIP;
 SHAFT = 3.5;
-WIRE_DIA = 2.5;
+WIRE_DIA = 3;
 REED_DIA = 2.5;
-REED_WIRE = 1.5;
+REED_WIRE = 2;
 REED_LENGTH = 14;
 SHORT_WALL = EDGE - SHAFT/2;
-FINS = 2;
+WELL_DEPTH = 5;
 
 
-//for (row = [0 : 3]) {
-//    for (col = [0 : 3]) {
-//        x(col*2.0*EDGE) y(row*2.0*EDGE) square();
-//    }
-//}
-square();
+row_max = 4;
+col_max = 4;
+for (row = [1 : row_max]) {
+    for (col = [1 : col_max]) {
+        x(col*2.0*EDGE) y(row*2.0*EDGE)
 
-module square() {
+//        // TopLeft
+//        square(left = false,
+//               right = col != col_max,
+//               bottom = row != 1,
+//               top = false );
+        
+//        // TopRight
+//        square(left = col <= col_max,
+//               right = false,
+//               bottom = row != 1,
+//               top = false );
+        
+//        // BottomLeft
+//        square(left = false,
+//               right = col != col_max,
+//               bottom = false,
+//               top = true );
+        
+        // BottomRight
+        square(left = true,
+               right = false,
+               bottom = false,
+               top = true );
+    }
+}
+//square();
+
+module square(left = false, right = true, bottom = true, top = false) {
     blue() y(EDGE/2) z(DEPTH/2)
     cube([THICK, WALL, DEPTH], center = true);
-    
+
     magenta() y(-EDGE/2) z(DEPTH/2 - REED_DIA/2)
     cube([THICK, EDGE - 2*SHAFT + GAP, DEPTH - REED_DIA], center = true);
-    
+
+    cyan() y(-EDGE/2) z(DEPTH/4 - REED_DIA/2)
+    difference() {
+        cube([THICK, EDGE, DEPTH/2 - REED_DIA], center = true);
+        y(-EDGE/2+WIRE_DIA-THICK/2-0.75) z(WIRE_DIA/2-0.25) ry(90)
+        cylinder(h = 2*SHAFT, d = WIRE_DIA, center = true);
+    }
+
     red() x(THICK/2) z(DEPTH/2)
     difference() {
         cube([LONG_WALL, THICK, DEPTH], center = true);
         x(2.5) z(-DEPTH + 11.5) rx(90)
         cylinder(h = 2*THICK, d = WIRE_DIA, center = true);
     }
-    
-    green() x(EDGE) y(-THICK/2) z(DEPTH/2)
-    difference() {
-        cube([THICK, LONG_WALL, DEPTH], center = true);
-        y(REED_DIA/2+THICK-WALL) z(WIRE_DIA/2+THICK-DEPTH/2) ry(90)
-        cylinder(h = 2*SHAFT, d = WIRE_DIA, center = true);
+
+    if (right) {
+        green() x(EDGE) y(-THICK/2) z(DEPTH/2)
+        difference() {
+            cube([THICK, LONG_WALL, DEPTH], center = true);
+            y(REED_DIA/2+THICK-WALL) z(WIRE_DIA-DEPTH/2) ry(90)
+            cylinder(h = 2*SHAFT, d = WIRE_DIA, center = true);
+        }
     }
-    yellow() x(THICK/2) y(-EDGE) z(DEPTH/2)
-    difference() {
-        cube([LONG_WALL, THICK, DEPTH], center = true);
-        x(2.5) z(-DEPTH + 11.5) rx(90)
-        cylinder(h = 2*THICK, d = WIRE_DIA, center = true);
+    
+    if (left) {
+        white() x(-EDGE) y(-THICK/2) z(DEPTH/2)
+        difference() {
+            cube([THICK, LONG_WALL, DEPTH], center = true);
+            y(REED_DIA/2+THICK-WALL) z(WIRE_DIA/2+THICK-DEPTH/2) ry(90)
+            cylinder(h = 2*SHAFT, d = WIRE_DIA, center = true);
+        }
+    }
+    
+    if (bottom) {
+        yellow() x(THICK/2) y(-EDGE) z(DEPTH/2)
+        difference() {
+            cube([LONG_WALL, THICK, DEPTH], center = true);
+            x(2.5) z(-DEPTH + 11.5) rx(90)
+            cylinder(h = 2*THICK, d = WIRE_DIA, center = true);
+        }
     }
 
-    cyan() dy() x(EDGE + FINS/2) y(THICK + GAP/2) z(DEPTH/2 - REED_DIA/2)
-    cube([FINS, THICK, DEPTH - REED_DIA], center = true);
-    
-    white() dx() x(THICK + GAP/2) y(-EDGE - FINS/2) z(DEPTH/2 - REED_DIA/2)
-    cube([THICK, FINS, DEPTH - REED_DIA], center = true);
-    
-    magenta() x(EDGE - THICK - GAP/2) y(-EDGE - FINS/2) z(DEPTH/2 - REED_DIA/2)
-    cube([THICK, FINS, DEPTH - REED_DIA], center = true);
-    
-    blue() x(-EDGE + THICK) y(-EDGE - FINS/2) z(DEPTH/2 - REED_DIA/2)
-    cube([THICK, FINS, DEPTH - REED_DIA], center = true);
-    
-    red() x(EDGE + FINS/2) y(-EDGE + THICK + GAP/2) z(DEPTH/2 - REED_DIA/2)
-    cube([FINS, THICK, DEPTH - REED_DIA], center = true);
-   
-    white() x(EDGE + FINS/2) y(EDGE - FINS - THICK/2 - GAP/2) z(DEPTH/2 - REED_DIA/2)
-    cube([FINS, THICK, DEPTH - REED_DIA], center = true);
-   
-    
-    y(-SHAFT/2) well();
-    y(SHAFT/2-EDGE) difference() {
-        z(0)  rz(180) sz(1) well();
-        y(0) z(REED_DIA/2) ry(90)
-        cylinder(h = 2*SHAFT, d = SHAFT, center = true);
-        y(0) cube([SHAFT, SHAFT, SHAFT], center = true);
+    if (top) {
+        black() x(THICK/2) y(EDGE) z(DEPTH/2)
+        difference() {
+            cube([LONG_WALL, THICK, DEPTH], center = true);
+            x(2.5) z(-DEPTH + 11.5) rx(90)
+            cylinder(h = 2*THICK, d = WIRE_DIA, center = true);
+        }
+    }
+    y(-SHAFT/2) z(DEPTH - REED_DIA) well();
+
+    y(SHAFT/2-EDGE) z(DEPTH - REED_DIA) well();
+
+    // Tips
+    z(DEPTH + TIP/2) 
+    for (row = [0 : 1]) {
+        for (col = [0 : 1]) {
+            x((col-1)*EDGE) y((1-row)*EDGE) 
+            cube([THICK, THICK, TIP], center = true);
+        }
     }
     
+
+    // Reed Switch
 //    y(-EDGE/2) z(DEPTH - REED_DIA/2) rx(90)
 //    cylinder(h = REED_LENGTH, d = REED_DIA, center = true);
 }
 
 module well() {
+    z(-WELL_DEPTH/2) ry(180)
     difference() {
-        cylinder(h = DEPTH - REED_DIA, d = SHAFT);
-        cylinder(h = DEPTH - REED_DIA + 1, d = REED_WIRE);
-        x(1.5*REED_WIRE) cube([5, REED_WIRE, 7], center = true);
+        cylinder(h = WELL_DEPTH, d = SHAFT, center=true);
+        cylinder(h = WELL_DEPTH + 1, d = REED_WIRE, center=true);
     }
 }
